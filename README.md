@@ -5,6 +5,8 @@
 🚀 **Live Demo**: [https://task-manager-oh24.vercel.app/]
 
 ## 🌟 プロダクトの核となる特徴
+<img src="https://github.com/user-attachments/assets/5f12f74e-33f4-43a5-954c-8152dc73a8d0" width="250">
+<img src="https://github.com/user-attachments/assets/877ccc0e-ac1a-457c-aacf-bdf61fa978ba" width="250">
 
 - **AI音声タスク登録**: Gemini 2.5 Flash APIを搭載。曖昧な発話からタスク名・期限・カテゴリを自動抽出し、最小限の操作で登録を完了します。
 - **即時報酬デザイン**: タスク完了時に `canvas-confetti` による視覚的な演出を行い、日々の達成感を最大化します。
