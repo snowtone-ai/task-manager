@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__brave-search__brave_web_search",
+      "Bash(pnpm add:*)",
+      "Bash(python /c/Users/chidj/dev/task-manager/generate_icons.py)",
+      "Bash(python3)",
+      "Read(//c/c/Users/chidj/dev/task-manager/public/**)",
+      "Read(//c/c/Users/chidj/dev/task-manager/public/icons/**)",
+      "Bash(dir \"C:\\\\Users\\\\chidj\\\\dev\\\\task-manager\\\\public\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\chidj\\\\dev\\\\task-manager\\\\public\\\\icons\" /b)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "Bash(mkdir:*)",
+      "Bash(cat .eslintrc*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vercel:*)"
+    ]
+  }
+}

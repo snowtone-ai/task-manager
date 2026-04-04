@@ -1,1 +1,58 @@
-@AGENTS.md
+# CLAUDE.md
+
+## 技術スタック
+Next.js 16+ (App Router) / React 19 / TypeScript (strict: true) / Tailwind CSS v4 / pnpm / Vercel
+PWA構成（next-pwa） / IndexedDB（Dexie.js） / Web Speech API / Gemini 2.5 Flash API
+
+## 地雷回避ルール
+- Tailwind のスタイル設定時 → globals.css の @theme で定義する。tailwind.config.ts は作らない（v4 CSS-First Configuration）
+- ページコンポーネントで params/searchParams を使う時 → 必ず await で非同期アクセスする（Next.js 16で同期アクセスは完全削除済み）
+- cookies() / headers() を使う時 → 必ず await する（Next.js 16で同期アクセスは完全削除済み）
+- middleware を使う時 → ファイル名は proxy.ts、エクスポート関数名も proxy にする（Next.js 16で middleware.ts は廃止）
+- パッケージの依存関係エラー時 → --force ではなく pnpm を使う
+- Vercel にデプロイする前 → npx tsc --noEmit && pnpm lint && pnpm build をローカルで実行する
+- Server Component をデフォルトにする。"use client" は状態管理やブラウザAPIが必要な時だけ追加し、コンポーネントツリーの末端（リーフ）に配置する
+- @tailwind base/components/utilities を使わない → @import "tailwindcss" の1行に置き換える
+- postcss.config に postcss-import や autoprefixer を書かない → Tailwind v4 が内部処理する
+- IndexedDB（Dexie.js）を使うコンポーネントを page.tsx から呼ぶ時 → `"use client"` + `dynamic(() => import(...), { ssr: false })` でSSRを無効化する。Server Componentで `ssr: false` を使うとビルドエラーになるため、page.tsx 自体を `"use client"` にする
+
+## 知識同期ルール（Context7 MCP）
+- Next.js / React / Tailwind / shadcn/ui / Dexie.js のAPIを使う時 → 必ず Context7 MCP で公式ドキュメントを確認してから実装する。推測で実装しない。例外なし
+
+## Web調査ルール（Brave Search MCP）
+- エラーの解決策を調べる時 → Brave Search MCP で最新の情報を検索する
+- ライブラリの選定・比較を行う時 → Brave Search MCP で現在の評価・互換性を確認する
+
+## 外部サービス事前調査ルール
+- 外部API・サービス・AIモデルを使う時 → 実装前に Brave Search MCP で以下を必ず確認する：
+  (1) 現在の最新バージョン/モデル名（古いバージョンを使わない）
+  (2) 無料枠の制限（RPM / TPM / 日次クォータ / 月次クォータ）
+  (3) 料金体系（従量課金の単価、無料枠超過時の挙動）
+  (4) レート制限の回避策（バックオフ、バッチ処理、キュー）
+- 調査結果を vision.md の制約セクション（または該当タスクのコメント）に記録する
+- 「たぶんこのモデル/バージョンで大丈夫」は禁止。確認してから使う
+
+## 自己検証ルール（Playwright MCP + ユーザー目視）
+- UI機能の実装後 → Playwright MCP でブラウザ上の動作を検証する
+- 検証完了後 → ユーザーに「ブラウザで http://localhost:3000/[パス] を開き、[具体的に何が見えるか] を確認してください」と指示する。AIの自己申告だけで完了としない
+- 機能実装後 → vision.md の Acceptance Criteria の各項目について合否を1行ずつ報告する
+
+## エラーループ脱出ルール
+- 同じエラーを2回修正して直らない時 → 修正を止めて以下を実行する：
+  (1) 根本原因の仮説を述べる
+  (2) 試した修正とその結果を列挙する
+  (3) 解決に不足している情報を特定する
+  (4) ユーザーに判断を仰ぐ
+
+## 3層境界
+- ✅ Always: テスト実行、lint通過確認、動作確認コミット、Plan Mode でのタスク開始
+- ⚠️ Ask first: 新規依存の追加、DB/APIスキーマ変更、設定ファイル（package.json等）の変更
+- 🚫 Never: .env のコミット、node_modules 編集、失敗テストの削除
+
+## コンテキスト管理
+- /compact 時は変更ファイル一覧と現在のタスク状況を必ず保持する
+- 3タスク完了ごと、または30分経過時 → /context でトークン使用率を確認しユーザーに報告する
+
+## 自己改善
+- 間違えた時 → このファイルにルールを追加して再発防止する（最終行に記載）
+- `<html>` タグを書く時 → `suppressHydrationWarning` を必ず付ける。VS Code等のブラウザ拡張が `--vsc-domain` などの属性を注入してhydration mismatchを起こすため
