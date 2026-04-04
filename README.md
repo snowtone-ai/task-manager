@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Focus Task Manager PWA
 
-## Getting Started
+大学生活と就職活動のマルチタスクを整理し、ユーザーが「今、何をすべきか」を瞬時に把握することに特化した、自分専用のタスク管理PWA（Progressive Web App）です。
 
-First, run the development server:
+🚀 **Live Demo**: [https://task-manager-oh24.vercel.app/]
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🌟 プロダクトの核となる特徴
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **AI音声タスク登録**: Gemini 2.5 Flash APIを搭載。曖昧な発話からタスク名・期限・カテゴリを自動抽出し、最小限の操作で登録を完了します。
+- **即時報酬デザイン**: タスク完了時に `canvas-confetti` による視覚的な演出を行い、日々の達成感を最大化します。
+- **継続の可視化（Streak）**: 毎日の全タスク完了を「🔥 ストリーク」として記録し、継続のモチベーションを維持します。
+- **オフラインファースト**: PWA対応および IndexedDB（Dexie.js）の採用により、通信環境に左右されない高速な操作性を実現しています。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠 技術スタック
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2026年時点の最新のモダンWebスタックを採用し、パフォーマンスと保守性を両立させています。
 
-## Learn More
+- [cite_start]**Framework**: Next.js 16+ (App Router), React 19 [cite: 2, 4]
+- [cite_start]**Styling**: Tailwind CSS v4 (CSS-First Configuration) [cite: 2, 4]
+- [cite_start]**Language**: TypeScript (Strict Mode) [cite: 2]
+- **AI Integration**: Gemini 2.5 Flash API
+- **Local Database**: Dexie.js (IndexedDB)
+- [cite_start]**Deployment**: Vercel [cite: 2, 4]
+- [cite_start]**Package Manager**: pnpm [cite: 2, 4]
 
-To learn more about Next.js, take a look at the following resources:
+## 🤖 AI-Driven Development (AI協調開発)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[cite_start]このプロジェクトは、AIエージェントと密接に協調する次世代の開発手法で構築されました [cite: 1]。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. [cite_start]**PMエージェントによる要件定義**: 独自の「要件定義専門PMエージェント」を用いて曖昧なアイデアを `vision.md` に構造化 [cite: 1]。
+2. [cite_start]**Claude Code による自律実装**: `CLAUDE.md` に蓄積された地雷回避ルールに基づき、Claude Code がコードの実装・デバッグ・検証（Playwright）を自律的に実行 [cite: 1, 2]。
+3. [cite_start]**自己進化プロセス**: 開発中に発生したエラーの教訓を `xp-rules.md` に蓄積し、開発プロセス自体を継続的に改善 [cite: 2]。
 
-## Deploy on Vercel
+## 🚀 セットアップと実行
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. 環境変数の設定
+`.env.local` ファイルを作成し、以下のキーを設定してください。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
