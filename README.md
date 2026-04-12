@@ -2,7 +2,7 @@
 
 大学生活と就職活動のマルチタスクを整理し、ユーザーが「今、何をすべきか」を瞬時に把握することに特化した、自分専用のタスク管理PWA（Progressive Web App）です。
 
-🚀 **Live Demo**: [https://task-manager-oh24.vercel.app/]
+※自分専用前提で設計しているので、他の人はおそらく使用できません。
 
 ## 🌟 プロダクトの核となる特徴
 <img src="https://github.com/user-attachments/assets/5f12f74e-33f4-43a5-954c-8152dc73a8d0" width="250">
