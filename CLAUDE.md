@@ -14,7 +14,8 @@ PWA構成（next-pwa） / IndexedDB（Dexie.js） / Web Speech API / Gemini 2.5 
 - Server Component をデフォルトにする。"use client" は状態管理やブラウザAPIが必要な時だけ追加し、コンポーネントツリーの末端（リーフ）に配置する
 - @tailwind base/components/utilities を使わない → @import "tailwindcss" の1行に置き換える
 - postcss.config に postcss-import や autoprefixer を書かない → Tailwind v4 が内部処理する
-- IndexedDB（Dexie.js）を使うコンポーネントを page.tsx から呼ぶ時 → `"use client"` + `dynamic(() => import(...), { ssr: false })` でSSRを無効化する。Server Componentで `ssr: false` を使うとビルドエラーになるため、page.tsx 自体を `"use client"` にする
+- IndexedDB（Dexie.js）を使うコンポーネントを page.tsx から呼ぶ時 → `"use client"` + `dynamic(() => import(...), { ssr: false, loading: <フォールバックUI> })` でSSRを無効化する。Server Componentで `ssr: false` を使うとビルドエラーになるため、page.tsx 自体を `"use client"` にする。`loading` プロパティを省略するとchunk解決失敗時に画面が真っ白になるため必須
+- Dexie の `new Dexie()` はモジュールトップレベルではなく **遅延初期化**にする（`getDb()` + Proxy）。モジュールロード時にインスタンス化するとSSRで `typeof window === "undefined"` の環境でも評価されてしまう
 
 ## 知識同期ルール（Context7 MCP）
 - Next.js / React / Tailwind / shadcn/ui / Dexie.js のAPIを使う時 → 必ず Context7 MCP で公式ドキュメントを確認してから実装する。推測で実装しない。例外なし
@@ -56,3 +57,7 @@ PWA構成（next-pwa） / IndexedDB（Dexie.js） / Web Speech API / Gemini 2.5 
 ## 自己改善
 - 間違えた時 → このファイルにルールを追加して再発防止する（最終行に記載）
 - `<html>` タグを書く時 → `suppressHydrationWarning` を必ず付ける。VS Code等のブラウザ拡張が `--vsc-domain` などの属性を注入してhydration mismatchを起こすため
+- Service Worker の `install` イベントで `cache.addAll([...])` を **使ってはいけない**。`addAll` は全URLの成功を要求するため、1つでも404/networkエラーだとinstall全体が失敗し、古いSWが永続化して全ユーザーが詰む（「読み込み中のまま」バグの真因）。install は `self.skipWaiting()` のみで絶対に失敗しない形にし、キャッシュは `fetch` イベントで都度 `cache.put` する
+- `controllerchange` リスナーは **`navigator.serviceWorker.controller` の有無に関わらず常に登録** する。条件付き登録だと初回SW登録時の controller 取得イベントを取りこぼす
+- Service Worker 登録時は必ず `{ updateViaCache: "none" }` を指定し、`reg.update()` を毎ロード呼び出す。これでブラウザの HTTP キャッシュをバイパスして `/sw.js` を常に最新版で取得する
+- PWA の `loading` state は **1.5秒以内** にフォールバック解除する。5秒だとADHDユーザーが「壊れた」と判定してアプリを閉じる

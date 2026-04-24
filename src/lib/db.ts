@@ -35,4 +35,24 @@ class TaskManagerDB extends Dexie {
   }
 }
 
-export const db = new TaskManagerDB();
+// Lazy singleton — instantiating Dexie at module load triggers side effects
+// that only make sense in the browser. Keeping this lazy lets server-side
+// rendering safely import anything from `lib/db` without touching IndexedDB.
+let _db: TaskManagerDB | null = null;
+
+export function getDb(): TaskManagerDB {
+  if (typeof window === "undefined") {
+    throw new Error("getDb() called in a non-browser environment");
+  }
+  if (!_db) _db = new TaskManagerDB();
+  return _db;
+}
+
+// Back-compat proxy so existing `db.tasks...` call sites keep working.
+// Access on the server will throw via getDb() — intended.
+export const db = new Proxy({} as TaskManagerDB, {
+  get(_target, prop) {
+    const real = getDb() as unknown as Record<string | symbol, unknown>;
+    return real[prop as string];
+  },
+});

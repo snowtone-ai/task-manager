@@ -95,16 +95,24 @@ export function HomeScreen() {
   }
 
   useEffect(() => {
-    // 通知許可状態を初期化
-    setNotifPermission(getNotificationPermission());
-    const dismissed = localStorage.getItem("notif-banner-dismissed") === "1";
-    setNotifBannerDismissed(dismissed);
+    // 通知許可やlocalStorage読取で例外が起きても、後続のタスクロードとフォールバックを必ず走らせる
+    try {
+      setNotifPermission(getNotificationPermission());
+    } catch (err) {
+      console.error("[home] notif permission check failed:", err);
+    }
+    try {
+      const dismissed = localStorage.getItem("notif-banner-dismissed") === "1";
+      setNotifBannerDismissed(dismissed);
+    } catch (err) {
+      console.error("[home] localStorage read failed:", err);
+    }
 
-    // IndexedDBがハングしてもローディングが解除されるよう5秒のフォールバック
-    const fallback = setTimeout(() => setLoading(false), 5000);
+    // IndexedDBがハングしても1.5秒でローディングを必ず解除する
+    const fallback = setTimeout(() => setLoading(false), 1500);
 
     Promise.all([loadTasks(), refreshStreak()])
-      .catch(console.error)
+      .catch((err) => console.error("[home] initial load failed:", err))
       .finally(() => {
         clearTimeout(fallback);
         setLoading(false);

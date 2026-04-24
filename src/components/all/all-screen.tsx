@@ -96,12 +96,12 @@ export function AllScreen() {
   }
 
   useEffect(() => {
-    // IndexedDBがハングしてもローディングが解除されるよう5秒のフォールバック
-    const fallback = setTimeout(() => setLoading(false), 5000);
+    // IndexedDBがハングしても1.5秒でローディングを必ず解除する
+    const fallback = setTimeout(() => setLoading(false), 1500);
 
     getAllTasks()
       .then(tasks => setAllTasks(tasks))
-      .catch(console.error)
+      .catch((err) => console.error("[all] initial load failed:", err))
       .finally(() => {
         clearTimeout(fallback);
         setLoading(false);

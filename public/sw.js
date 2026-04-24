@@ -1,4 +1,6 @@
-const CACHE_NAME = "task-manager-v3";
+// Bump this when SW logic changes. All clients discard old caches on activate.
+const CACHE_NAME = "task-manager-v4";
+const NAV_TIMEOUT_MS = 3000;
 
 // ── Scheduled Notification Timers ─────────────────────────────────────────
 /** Map of notification id -> setTimeout timer id */
@@ -7,10 +9,14 @@ const scheduledTimers = new Map();
 self.addEventListener("message", (event) => {
   if (!event.data) return;
 
+  if (event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+    return;
+  }
+
   if (event.data.type === "SCHEDULE_NOTIFICATIONS") {
     const { notifications } = event.data;
 
-    // Cancel all existing timers
     for (const timerId of scheduledTimers.values()) {
       clearTimeout(timerId);
     }
@@ -19,7 +25,7 @@ self.addEventListener("message", (event) => {
     const now = Date.now();
     for (const notif of notifications) {
       const delay = notif.scheduledAt - now;
-      if (delay <= 0) continue; // Already past, skip
+      if (delay <= 0) continue;
 
       const timerId = setTimeout(() => {
         self.registration.showNotification(notif.title, {
@@ -34,6 +40,7 @@ self.addEventListener("message", (event) => {
 
       scheduledTimers.set(notif.id, timerId);
     }
+    return;
   }
 
   if (event.data.type === "TEST_NOTIFICATION") {
@@ -45,7 +52,6 @@ self.addEventListener("message", (event) => {
   }
 });
 
-// Notification click: focus the app window
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(
@@ -60,30 +66,24 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// App shell assets to cache on install
-const APP_SHELL = ["/", "/all", "/manifest.webmanifest"];
-
+// Install: never fail. Skip waiting immediately so the new SW can take over on next activate.
+// We intentionally do NOT pre-cache app-shell via addAll() — any single 404 / network blip
+// would fail the whole install and leave the user stuck on the previous SW version.
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
+// Activate: purge all caches that don't match CACHE_NAME, then claim every client
+// so this SW immediately controls already-open pages.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+      await self.clients.claim();
+    })()
   );
 });
 
@@ -91,31 +91,52 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and cross-origin requests
   if (request.method !== "GET" || url.origin !== location.origin) return;
 
-  // Skip Next.js internal routes
-  if (url.pathname.startsWith("/_next/")) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
-
-  // Navigation requests: network-first (ensures fresh HTML after deployments)
+  // Navigation requests (HTML): network-first with 3s timeout, fallback to cache.
+  // Always fetches the latest HTML after a deployment, but stays usable offline.
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(navigationHandler(request));
     return;
   }
 
-  // Static assets: cache-first
-  event.respondWith(cacheFirst(request));
+  // Next.js build assets (hashed): cache-first is safe — filenames are content-addressed.
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Everything else (including /_next/data, API, images): network-first.
+  event.respondWith(networkFirst(request));
 });
+
+async function navigationHandler(request) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NAV_TIMEOUT_MS);
+  try {
+    const response = await fetch(request, { signal: controller.signal });
+    clearTimeout(timer);
+    if (response && response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone()).catch(() => {});
+    }
+    return response;
+  } catch {
+    clearTimeout(timer);
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    const fallback = await caches.match("/");
+    if (fallback) return fallback;
+    return new Response("Network error", { status: 503 });
+  }
+}
 
 async function networkFirst(request) {
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response && response.ok) {
       const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+      cache.put(request, response.clone()).catch(() => {});
     }
     return response;
   } catch {
@@ -130,9 +151,9 @@ async function cacheFirst(request) {
 
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response && response.ok) {
       const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+      cache.put(request, response.clone()).catch(() => {});
     }
     return response;
   } catch {
