@@ -1,4 +1,4 @@
-const CACHE_NAME = "task-manager-v2";
+const CACHE_NAME = "task-manager-v3";
 
 // ── Scheduled Notification Timers ─────────────────────────────────────────
 /** Map of notification id -> setTimeout timer id */
@@ -100,9 +100,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigation requests: stale-while-revalidate from cache
+  // Navigation requests: network-first (ensures fresh HTML after deployments)
   if (request.mode === "navigate") {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 
@@ -122,18 +122,6 @@ async function networkFirst(request) {
     const cached = await caches.match(request);
     return cached ?? new Response("Network error", { status: 503 });
   }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-
-  const fetchPromise = fetch(request).then((response) => {
-    if (response.ok) cache.put(request, response.clone());
-    return response;
-  });
-
-  return cached ?? fetchPromise;
 }
 
 async function cacheFirst(request) {
