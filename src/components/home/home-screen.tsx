@@ -100,9 +100,17 @@ export function HomeScreen() {
     const dismissed = localStorage.getItem("notif-banner-dismissed") === "1";
     setNotifBannerDismissed(dismissed);
 
+    // IndexedDBがハングしてもローディングが解除されるよう5秒のフォールバック
+    const fallback = setTimeout(() => setLoading(false), 5000);
+
     Promise.all([loadTasks(), refreshStreak()])
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(fallback);
+        setLoading(false);
+      });
+
+    return () => clearTimeout(fallback);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 

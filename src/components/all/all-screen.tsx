@@ -96,10 +96,18 @@ export function AllScreen() {
   }
 
   useEffect(() => {
+    // IndexedDBがハングしてもローディングが解除されるよう5秒のフォールバック
+    const fallback = setTimeout(() => setLoading(false), 5000);
+
     getAllTasks()
       .then(tasks => setAllTasks(tasks))
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(fallback);
+        setLoading(false);
+      });
+
+    return () => clearTimeout(fallback);
   }, []);
 
   // ── Calendar computation ─────────────────────────────────────────────────

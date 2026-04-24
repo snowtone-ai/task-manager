@@ -1,4 +1,4 @@
-const CACHE_NAME = "task-manager-v1";
+const CACHE_NAME = "task-manager-v2";
 
 // ── Scheduled Notification Timers ─────────────────────────────────────────
 /** Map of notification id -> setTimeout timer id */
