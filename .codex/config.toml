@@ -1,0 +1,13 @@
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[features]
+codex_hooks = true
+
+[profiles.standard]
+model_reasoning_effort = "medium"
+
+[profiles.light]
+model_reasoning_effort = "low"
