@@ -17,8 +17,10 @@ import {
   type NotificationPermissionState,
 } from "@/lib/notifications";
 import { todayDateString } from "@/lib/domain/task-date";
+import { usePlant } from "./use-plant";
 
 export function useHomeScreen() {
+  const plant = usePlant();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -30,6 +32,7 @@ export function useHomeScreen() {
     useState<NotificationPermissionState>("unsupported");
   const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
   const [testNotifSent, setTestNotifSent] = useState(false);
+  const [showGmailModal, setShowGmailModal] = useState(false);
   const today = todayDateString();
 
   async function loadTasks() {
@@ -93,6 +96,11 @@ export function useHomeScreen() {
       refreshStreak,
       setAllCompleteMessage,
     });
+    if (!task.completed) {
+      await plant.incrementCompleted();
+    } else {
+      await plant.decrementCompleted();
+    }
     scheduleTaskNotifications().catch(console.error);
   }
 
@@ -117,7 +125,9 @@ export function useHomeScreen() {
     notifPermission,
     notifBannerDismissed,
     testNotifSent,
+    showGmailModal,
     setShowAddModal,
+    setShowGmailModal,
     setEditingTask,
     handleRequestNotification,
     handleDismissNotifBanner,

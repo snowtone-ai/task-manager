@@ -4,6 +4,7 @@ import {
   sortTasksByTime,
   taskForDisplayDate,
   todayDateString,
+  toDateStr,
 } from "./domain/task-date";
 
 // ── Task CRUD ──────────────────────────────────────────────────────────────
@@ -113,21 +114,18 @@ export async function getCurrentStreakCount(): Promise<number> {
   if (streaks.length === 0) return 0;
 
   let count = 0;
-  const today = new Date();
+  const todayStr = todayDateString();
 
   for (let i = 0; i < streaks.length; i++) {
     const streak = streaks[i];
     if (!streak.allCompleted) break;
 
-    const streakDate = new Date(streak.date);
-    const expectedDate = new Date(today);
-    expectedDate.setDate(today.getDate() - i);
+    // ローカル日付ベースで期待値を算出（ISO変換によるUTCズレを回避）
+    const d = new Date(`${todayStr}T00:00:00`);
+    d.setDate(d.getDate() - i);
+    const expected = toDateStr(d.getFullYear(), d.getMonth(), d.getDate());
 
-    const isSameDay =
-      streakDate.toISOString().slice(0, 10) ===
-      expectedDate.toISOString().slice(0, 10);
-
-    if (!isSameDay) break;
+    if (streak.date !== expected) break;
     count++;
   }
 

@@ -5,7 +5,7 @@
 - Current executor: なし（セッション終了）
 - Write lock: なし
 - Last verified: 2026-05-09
-- Verification mode: standard
+- Verification mode: final
 
 ## Done
 - [x] F-1: ホーム画面（今日のタスク一覧）
@@ -19,12 +19,12 @@
 - [x] pm-zero v9.1 OS構造導入
 - [x] プロダクトコード品質ゲート適用
 - [x] Task Plant 進化計画（計画フェーズ完了）
+- [x] Task Plant Phase 1-7（実装・最終検証完了）
 
 ## Doing
-（なし）
+- Task Plant Phase 7 完了。Claudeレビュー待ち。
 
 ## Next
-- [ ] Task Plant Phase 1-7（CodeX 5.5 medium が実装予定。docs/codex-prompt.md を使用）
 - [ ] F-8: 繰り返しタスク
 - [ ] F-9: 締切通知（前日+当日）
 - [ ] F-10: UI仕上げ + レスポンシブ調整

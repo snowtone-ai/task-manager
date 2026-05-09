@@ -6,7 +6,9 @@ interface ListViewProps {
   tasks: Task[];
   today: string;
   categoryFilter: Category | "all";
+  showFutureOnly: boolean;
   onCategoryFilterChange: (category: Category | "all") => void;
+  onShowFutureOnlyChange: (value: boolean) => void;
   onEditTask: (task: Task) => void;
 }
 
@@ -14,7 +16,9 @@ export function ListView({
   tasks,
   today,
   categoryFilter,
+  showFutureOnly,
   onCategoryFilterChange,
+  onShowFutureOnlyChange,
   onEditTask,
 }: ListViewProps) {
   return (
@@ -33,6 +37,15 @@ export function ListView({
           </button>
         ))}
       </div>
+      <label className="flex items-center gap-2 px-4 pb-3 text-sm text-muted-foreground">
+        <input
+          type="checkbox"
+          checked={showFutureOnly}
+          onChange={(event) => onShowFutureOnlyChange(event.target.checked)}
+          className="rounded border-border"
+        />
+        今日以降のみ表示
+      </label>
 
       {tasks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center px-4">

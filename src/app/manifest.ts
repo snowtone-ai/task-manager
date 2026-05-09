@@ -13,6 +13,11 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["productivity"],
     icons: [
       {
+        src: "/icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+      },
+      {
         src: "/icons/icon-192.png",
         sizes: "192x192",
         type: "image/png",

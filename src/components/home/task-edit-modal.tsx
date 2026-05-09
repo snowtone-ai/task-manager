@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Trash2 } from "lucide-react";
 import { type Task, type Category, type Recurrence } from "@/lib/db";
 import { updateTask, deleteTask } from "@/lib/taskDb";
+import { CATEGORY_CONFIG, CATEGORY_LIST } from "@/lib/domain/category";
 
 interface TaskEditModalProps {
   task: Task;
@@ -11,24 +12,6 @@ interface TaskEditModalProps {
   onSaved: () => void;
   onDeleted: () => void;
 }
-
-const CATEGORIES: { value: Category; label: string }[] = [
-  { value: "job", label: "就活" },
-  { value: "university", label: "大学" },
-  { value: "life", label: "生活" },
-];
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  job: "bg-blue-500 text-white",
-  university: "bg-green-500 text-white",
-  life: "bg-purple-500 text-white",
-};
-
-const CATEGORY_OUTLINE: Record<Category, string> = {
-  job: "border-blue-500 text-blue-500",
-  university: "border-green-500 text-green-500",
-  life: "border-purple-500 text-purple-500",
-};
 
 const RECURRENCES: { value: Recurrence; label: string }[] = [
   { value: "none", label: "なし" },
@@ -46,6 +29,7 @@ export function TaskEditModal({
   onDeleted,
 }: TaskEditModalProps) {
   const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description ?? "");
   const [dueDate, setDueDate] = useState(task.dueDate);
   const [dueTime, setDueTime] = useState(task.dueTime ?? "");
   const [category, setCategory] = useState<Category>(task.category);
@@ -68,6 +52,7 @@ export function TaskEditModal({
     try {
       const changes: Partial<Omit<Task, "id" | "createdAt">> = {
         title: title.trim(),
+        description: description.trim(),
         dueDate,
         dueTime: dueTime || null,
         category,
@@ -140,6 +125,23 @@ export function TaskEditModal({
             />
           </div>
 
+          <div>
+            <label
+              htmlFor="edit-task-description"
+              className="mb-1 block text-sm font-medium text-foreground"
+            >
+              詳細
+              <span className="ml-1 text-xs text-muted-foreground">(任意)</span>
+            </label>
+            <textarea
+              id="edit-task-description"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full resize-none rounded-xl border border-border bg-muted px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            />
+          </div>
+
           {/* 期限日 + 期限時刻 */}
           <div className="flex gap-3">
             <div className="flex-1">
@@ -180,15 +182,15 @@ export function TaskEditModal({
           <div>
             <p className="mb-2 text-sm font-medium text-foreground">カテゴリ</p>
             <div className="flex gap-2">
-              {CATEGORIES.map(({ value, label }) => (
+              {CATEGORY_LIST.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setCategory(value)}
                   className={`flex-1 rounded-xl border-2 py-2 text-sm font-semibold transition-colors ${
                     category === value
-                      ? CATEGORY_COLORS[value]
-                      : `border ${CATEGORY_OUTLINE[value]} bg-transparent`
+                      ? CATEGORY_CONFIG[value].active
+                      : `border ${CATEGORY_CONFIG[value].outline} bg-transparent`
                   }`}
                 >
                   {label}
@@ -258,6 +260,11 @@ export function TaskEditModal({
                   className="w-24 rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                 />
                 <span className="ml-2 text-sm text-muted-foreground">日</span>
+                {recurrenceDayOfMonth > 28 && (
+                  <p className="mt-1.5 text-xs text-amber-600">
+                    2月など短い月はこの日にタスクが表示されません
+                  </p>
+                )}
               </div>
             )}
           </div>
