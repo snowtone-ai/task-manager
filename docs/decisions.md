@@ -62,6 +62,58 @@
 - 不採用案: 依存を即時追加してE2E/Unitを実装 → ロックファイル変更とテスト設定変更が大きくなる
 - 将来見直し条件: 次の機能追加またはバグ修正に着手する前
 
+## D-009: Google Auth — GIS OAuth2 参照を事前確定
+- 日付: 2026-05-09
+- 対象: api
+- 決定: `requestGoogleToken` は `google.accounts.oauth2` をローカル変数へ確定してから `initTokenClient` を呼ぶ
+- 採用理由: TypeScript narrowing を Promise 内でも維持し、GIS未ロード時は明示的に拒否するため
+- 実在例:
+  - 初回ロード直後で GIS script が未完了の場合、`window.google` が存在しない
+  - script は読み込まれたが accounts API 初期化前の場合、`google.accounts` が存在しない
+  - OAuth2 API が利用不能な場合、`google.accounts.oauth2` が存在しない
+- 不採用案: non-null assertion の追加のみ → 実行時の欠落検出が弱くなる
+- 将来見直し条件: GIS loader を明示導入し、読み込み状態を UI で管理する場合
+
+## D-010: Task Plant Phase1-7 実装方針（UI/API/DB/Workflow）
+- 日付: 2026-05-09
+- 対象: ui/api/db/workflow
+- 決定: `docs/implementation-plan.md` の Phase 1→7 を順守し、追加依存なしで実装する
+- 実在例:
+  - UI例1: 下部ナビを「ホーム / カレンダー / 植物」の3タブに拡張し、`/plant` への導線を統一
+  - UI例2: ホームのタスクカード右端に展開トグルを追加し、既存の「カードタップで編集」導線は維持
+  - UI例3: `/all` のリスト表示に「今日以降のみ表示」トグルを追加し、既定値をONにする
+  - API例1: Gmail APIで直近7日/最大20件を取得し、Geminiでタスク候補抽出後にユーザー選択で反映
+  - API例2: Google Calendar APIで将来イベント最大30件を取得し、タスク形式へ変換して取り込む
+  - API例3: Google Identity Servicesを`layout.tsx`へ読み込み、`use-google-auth.ts`経由でOAuth接続する
+  - DB例1: Dexie `version(2)` で `plantState` テーブルを追加し、`version(1)` は維持する
+  - DB例2: `plantState(id=1)` に週次完了数/累計完了数/週開始日を保存し、週跨ぎで `weeklyCompleted` をリセット
+  - DB例3: 植物成長段階を `weeklyCompleted` から算出し、タスク完了/取消で増減を同期する
+  - Workflow例1: 各Phase完了ごとに `npx tsc --noEmit && pnpm lint` を実行して次Phaseへ進む
+  - Workflow例2: IndexedDBを使う画面は `dynamic(..., { ssr: false, loading })` で遅延描画する
+  - Workflow例3: 最終検証で `npx tsc --noEmit` / `pnpm lint` / `pnpm build` をすべて通す
+- 不採用案: PixiJS導入（依存追加が必要でコストゼロ制約に反する）
+- 将来見直し条件: OAuthスコープ追加や月次植物ロジック変更が発生した場合
+
+## D-011: 12か月植物デザイン — 実物の成長差をSVGに反映
+- 日付: 2026-05-09
+- 対象: ui
+- 決定: 4アーキタイプの内部構成は維持しつつ、`PlantSpecies.nameEn` ごとに12種類の蕾・葉・花形を描き分ける
+- 採用理由: 月替わり植物が同一テンプレートに見えると、1年周期の報酬体験が弱くなるため
+- 実在例:
+  - 樹木系: 桜は蕾から開花へ段階があり、梅は丸い5弁と目立つ雄しべ、蝋梅は葉の少ない枝に黄色い蝋質花を咲かせる
+  - 蔓/低木系: 藤は垂れる総状花序、紫陽花は低木の葉と球状の装飾花房として表現する
+  - 草花/球根系: 朝顔は双葉・蔓・漏斗状花、コスモスは細い分枝と舌状花、金木犀は葉腋の小花群、シクラメンは斑入り葉と反り返る花弁として表現する
+- 不採用案: 4アーキタイプのみの色違い継続 → 12か月分の差が弱く、実物モデルの要求に合わない
+- 将来見直し条件: 写真素材やCanvas/bitmap表現を採用して、より写実寄りにする場合
+
+## D-012: Task.description フィールド — vision.md 未記載の拡張
+- 日付: 2026-05-09
+- 対象: db
+- 決定: `Task` に `description?: string` を追加（vision.md のデータモデルには記載なし）
+- 採用理由: タスクカードの展開表示で「詳細メモ」を入力・表示するため実装時に追加
+- 将来見直し条件: vision.md のデータモデルセクションに正式追記する
+- 影響ファイル: `src/lib/db.ts`, `src/components/home/task-add-modal.tsx`, `src/components/home/task-edit-modal.tsx`, `src/components/home/task-card.tsx`
+
 ## Future Changes
 - Codex CLI を本格導入した場合、state.md の Write Lock 運用を厳格化
 - ユーザー数増加時に Observability Gate の本格対応

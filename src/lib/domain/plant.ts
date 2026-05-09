@@ -30,25 +30,26 @@ const THRESHOLDS = [0, 3, 7, 12, 18, Infinity] as const;
 
 /** Map weekly completed count to a growth stage (0-5). */
 export function calcGrowthStage(weeklyCompleted: number): GrowthStage {
-  if (weeklyCompleted === 0) return 0;
-  if (weeklyCompleted <= 3)  return 1;
-  if (weeklyCompleted <= 7)  return 2;
-  if (weeklyCompleted <= 12) return 3;
-  if (weeklyCompleted <= 18) return 4;
-  return 5;
+  const completed = Math.max(0, weeklyCompleted);
+  const stage = THRESHOLDS.findIndex((threshold) => completed <= threshold);
+  return Math.max(0, stage) as GrowthStage;
 }
 
 /** Progress percentage toward the next growth stage. */
 export function calcProgress(weeklyCompleted: number, stage: GrowthStage): number {
-  const lo = THRESHOLDS[stage];
-  const hi = THRESHOLDS[stage + 1];
+  const hi = THRESHOLDS[stage];
+  if (stage === 0) return 0;
   if (hi === Infinity) return 100;
-  return Math.min(100, Math.round(((weeklyCompleted - lo) / (hi - lo)) * 100));
+
+  const lo = THRESHOLDS[stage - 1];
+  const completed = Math.max(0, weeklyCompleted);
+  const progress = Math.round(((completed - lo) / (hi - lo)) * 100);
+  return Math.min(100, Math.max(0, progress));
 }
 
 export function getCurrentSpecies(): PlantSpecies {
   const month = new Date().getMonth() + 1; // 1-12
-  return PLANT_SPECIES.find((p) => p.month === month)!;
+  return PLANT_SPECIES.find((p) => p.month === month) ?? PLANT_SPECIES[0];
 }
 
 const STAGE_LABELS = ["種", "芽吹き", "葉が出た", "つぼみ", "開花中", "満開"] as const;

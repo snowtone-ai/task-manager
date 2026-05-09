@@ -13,16 +13,18 @@ export function useGoogleAuth(scope: GoogleScope) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function connect() {
+  async function connect(): Promise<boolean> {
     setIsLoading(true);
     setError(null);
     try {
       await requestGoogleToken(scope);
       setIsConnected(true);
+      return true;
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Google認証に失敗しました"
       );
+      return false;
     } finally {
       setIsLoading(false);
     }

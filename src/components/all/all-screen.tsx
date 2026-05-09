@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Home, Calendar, List, Plus } from "lucide-react";
+import { Calendar, CalendarPlus, Home, Leaf, List, Plus } from "lucide-react";
 import { type Category, type Task } from "@/lib/db";
 import { getAllTasks } from "@/lib/taskDb";
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/lib/domain/task-date";
 import { TaskEditModal } from "@/components/home/task-edit-modal";
 import { TaskAddModal } from "@/components/home/task-add-modal";
+import { CalendarImportModal } from "@/components/calendar/calendar-import-modal";
 import { CalendarView } from "./calendar-view";
 import { ListView } from "./list-view";
 import { SelectedDateSheet } from "./selected-date-sheet";
@@ -31,6 +32,8 @@ export function AllScreen() {
   const [loading, setLoading] = useState(true);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showFutureOnly, setShowFutureOnly] = useState(true);
 
   async function loadTasks() {
     const tasks = await getAllTasks();
@@ -67,6 +70,7 @@ export function AllScreen() {
   const filteredTasks = sortTasksByDateTime(
     allTasks
       .filter((task) => categoryFilter === "all" || task.category === categoryFilter)
+      .filter((task) => !showFutureOnly || task.dueDate >= today)
       .map((task) => taskForDisplayDate(task, today))
   );
 
@@ -84,7 +88,17 @@ export function AllScreen() {
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="px-4 pt-8 pb-3 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">全タスク</h1>
-        <ViewToggle view={view} onChange={setView} />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCalendarModal(true)}
+            className="p-2 text-muted-foreground transition-transform active:scale-95"
+            aria-label="Calendarからインポート"
+          >
+            <CalendarPlus className="size-5" />
+          </button>
+          <ViewToggle view={view} onChange={setView} />
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(8rem + env(safe-area-inset-bottom))" }}>
@@ -105,7 +119,9 @@ export function AllScreen() {
             tasks={filteredTasks}
             today={today}
             categoryFilter={categoryFilter}
+            showFutureOnly={showFutureOnly}
             onCategoryFilterChange={setCategoryFilter}
+            onShowFutureOnlyChange={setShowFutureOnly}
             onEditTask={setEditingTask}
           />
         )}
@@ -136,6 +152,11 @@ export function AllScreen() {
           onTaskCreated={() => loadTasks().catch(console.error)}
         />
       )}
+      <CalendarImportModal
+        open={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
+        onTasksCreated={() => loadTasks().catch(console.error)}
+      />
       {editingTask && (
         <TaskEditModal
           task={editingTask}
@@ -190,6 +211,10 @@ function BottomNav() {
       <Link href="/all" aria-current="page" className="flex flex-1 flex-col items-center gap-1 py-3 text-orange-500">
         <Calendar className="size-5" />
         <span className="text-xs font-medium">カレンダー</span>
+      </Link>
+      <Link href="/plant" className="flex flex-1 flex-col items-center gap-1 py-3 text-muted-foreground">
+        <Leaf className="size-5" />
+        <span className="text-xs font-medium">植物</span>
       </Link>
     </nav>
   );

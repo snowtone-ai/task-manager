@@ -6,6 +6,7 @@ export type Recurrence = "none" | "daily" | "weekly" | "monthly";
 export interface Task {
   id: string;
   title: string;
+  description?: string;
   dueDate: string; // YYYY-MM-DD
   dueTime: string | null; // HH:MM or null (all-day)
   category: Category;
@@ -22,15 +23,29 @@ export interface Streak {
   allCompleted: boolean;
 }
 
+export interface PlantState {
+  id?: number;
+  weeklyCompleted: number;
+  lifetimeCompleted: number;
+  weekStartDate: string; // YYYY-MM-DD
+  lastUpdated: string; // ISO datetime
+}
+
 class TaskManagerDB extends Dexie {
   tasks!: Table<Task, string>;
   streaks!: Table<Streak, string>;
+  plantState!: Table<PlantState, number>;
 
   constructor() {
     super("TaskManagerDB");
     this.version(1).stores({
       tasks: "id, dueDate, category, completed, recurrence",
       streaks: "date",
+    });
+    this.version(2).stores({
+      tasks: "id, dueDate, category, completed, recurrence",
+      streaks: "date",
+      plantState: "++id",
     });
   }
 }

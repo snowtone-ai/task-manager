@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Calendar, Plus } from "lucide-react";
+import { Calendar, Home, Leaf, Mail, Plus } from "lucide-react";
 import { useHomeScreen } from "@/hooks/use-home-screen";
 import { todayDateString } from "@/lib/domain/task-date";
+import { GmailImportModal } from "@/components/gmail/gmail-import-modal";
 import { TaskCard } from "./task-card";
 import { TaskAddModal } from "./task-add-modal";
 import { TaskEditModal } from "./task-edit-modal";
@@ -22,9 +23,19 @@ export function HomeScreen() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <header className="px-4 pt-8 pb-3">
-        <p className="text-xs text-muted-foreground">{dateLabel}</p>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">今日のタスク</h1>
+      <header className="flex items-center justify-between px-4 pt-8 pb-3">
+        <div>
+          <p className="text-xs text-muted-foreground">{dateLabel}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">今日のタスク</h1>
+        </div>
+        <button
+          type="button"
+          onClick={() => screen.setShowGmailModal(true)}
+          className="p-2 text-muted-foreground transition-transform active:scale-95"
+          aria-label="Gmailからインポート"
+        >
+          <Mail className="size-5" />
+        </button>
       </header>
 
       {screen.streakCount > 0 && (
@@ -86,6 +97,11 @@ export function HomeScreen() {
           initialTitle={screen.addModalInitialTitle}
         />
       )}
+      <GmailImportModal
+        open={screen.showGmailModal}
+        onClose={() => screen.setShowGmailModal(false)}
+        onTasksCreated={screen.onTasksChanged}
+      />
       {screen.editingTask && (
         <TaskEditModal
           task={screen.editingTask}
@@ -196,6 +212,10 @@ function BottomNav() {
       <Link href="/all" className="flex flex-1 flex-col items-center gap-1 py-3 text-muted-foreground">
         <Calendar className="size-5" />
         <span className="text-xs font-medium">カレンダー</span>
+      </Link>
+      <Link href="/plant" className="flex flex-1 flex-col items-center gap-1 py-3 text-muted-foreground">
+        <Leaf className="size-5" />
+        <span className="text-xs font-medium">植物</span>
       </Link>
     </nav>
   );
