@@ -15,7 +15,7 @@ export function BottomNav({ currentPath }: { currentPath?: "/" | "/all" | "/plan
   const resolvedPath = currentPath ?? (pathname === "/all" || pathname === "/plant" ? pathname : "/");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 flex border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = item.href === resolvedPath;

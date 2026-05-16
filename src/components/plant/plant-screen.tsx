@@ -29,9 +29,9 @@ export function PlantScreen() {
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className="pointer-events-none object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/55" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/55" />
         </>
       ) : null}
 
