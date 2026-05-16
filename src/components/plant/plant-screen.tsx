@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { BottomNav } from "@/components/navigation/bottom-nav";
 import { usePlant } from "@/hooks/use-plant";
@@ -19,32 +20,49 @@ export function PlantScreen() {
   }, []);
 
   return (
-    <div className={`flex min-h-dvh flex-col bg-background ${flipped ? "flip-enter" : ""}`}>
-      <div className="flex flex-1 flex-col items-center justify-center px-4" style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}>
-        <div className="mb-4 text-center">
-          <p className="text-2xl font-bold text-foreground">{species.name}</p>
-          <p className="text-sm text-muted-foreground">
+    <div className={`relative flex min-h-dvh flex-col overflow-hidden bg-background ${flipped ? "flip-enter" : ""}`}>
+      {isBlooming ? (
+        <>
+          <Image
+            src={species.rewardImage}
+            alt={`${species.name}の写真`}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/55" />
+        </>
+      ) : null}
+
+      <div
+        className={`relative z-10 flex flex-1 flex-col items-center justify-center px-4 ${isBlooming ? "text-white" : ""}`}
+        style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+      >
+        <div className="mb-4 text-center drop-shadow-sm">
+          <p className={`text-2xl font-bold ${isBlooming ? "text-white" : "text-foreground"}`}>{species.name}</p>
+          <p className={`text-sm ${isBlooming ? "text-white/85" : "text-muted-foreground"}`}>
             {getStageLabel(stage)} · 今週 {state?.weeklyCompleted ?? 0}件完了
           </p>
         </div>
 
-        <div className="relative h-[400px] w-[300px]">
-          <PlantRenderer species={species} stage={stage} />
+        <div className={`relative h-[400px] w-[300px] ${isBlooming ? "pointer-events-none opacity-0" : ""}`}>
+          {!isBlooming ? <PlantRenderer species={species} stage={stage} /> : null}
           <PlantParticles color={species.color} active={isBlooming} />
         </div>
 
         {stage < 5 ? (
           <div className="mt-6 w-64">
-            <p className="mb-1 text-center text-xs text-muted-foreground">次のステージまで</p>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <p className={`mb-1 text-center text-xs ${isBlooming ? "text-white/80" : "text-muted-foreground"}`}>次のステージまで</p>
+            <div className={`h-2 overflow-hidden rounded-full ${isBlooming ? "bg-white/30" : "bg-muted"}`}>
               <div
-                className="h-full rounded-full bg-green-500 transition-all duration-500"
+                className={`h-full rounded-full transition-all duration-500 ${isBlooming ? "bg-white" : "bg-green-500"}`}
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
         ) : (
-          <p className="mt-6 text-sm font-semibold text-green-600">
+          <p className={`mt-6 text-sm font-semibold ${isBlooming ? "text-white" : "text-green-600"}`}>
             満開です！タスクを完了し続けて維持しましょう
           </p>
         )}

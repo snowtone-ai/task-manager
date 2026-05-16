@@ -158,3 +158,23 @@
 - Decision: Keep Task Plant project memory in AGENTS.md, tasks.md, docs/state.md, docs/repo-map.md, docs/decisions.md, and docs/issues.md.
 - Rationale: pm-zero v9.4 assigns reusable behavior, model defaults, and generic hooks to global config. The repo should keep only product facts, task state, and verification commands.
 - Consequence: Project-local Codex/MCP/hook scaffolds are removed unless a future task records a concrete deterministic need.
+
+## D-018: 植物報酬画像 — 写実的な生成写真アセットへ移行
+- 日付: 2026-05-17
+- 対象: ui / reward
+- 決定: 植物画面の報酬表現は、既存SVGイラストから、事前生成した超写実的な自然写真風アセットへ移行する方針とする。
+- 採用理由: タスク完了のインセンティブとして、自然で美しい花の写真体験がイラストより強く、月ごとの季節感も表現しやすいため。
+- 実例1: 花を主役にしつつ、梅は冬の枝、紫陽花は梅雨、コスモスは秋風など周囲の季節感を少し含める。
+- 実例2: 過度な幻想表現、非現実的な発光、作り物のような完全対称、花弁の破綻、余計な文字や人物は避ける。
+- 実例3: 各月の花ごとに5案生成し、選定後にアプリ同梱の固定アセットとして使う。実行時生成は報酬表示の即時性を損なうため避ける。
+- 将来見直し条件: API課金・生成運用を避けるため、D-019で無料写真素材へ方針変更済み。
+
+## D-019: 植物報酬画像 — 無料写真素材を事前同梱する
+- 日付: 2026-05-17
+- 対象: ui / reward / assets
+- 決定: 植物報酬画像は、GPT画像生成ではなく、無料利用可能なWeb写真素材をダウンロードしてアプリ用に編集・同梱する。
+- 採用理由: ユーザー専用アプリでAPI課金を避けたいこと、実写真の自然さを優先したいこと、既存写真を画面比率に合わせて編集すれば目的を満たせること。
+- 実例1: Unsplash等の写真ページで無料利用ライセンスを確認し、元URLを `docs/plant-reward-image-sources.md` に記録する。
+- 実例2: 人物・ブランド・ロゴ・文字が主役になる写真は避ける。
+- 実例3: 選定後に `public/plant-rewards/` 配下で画面用サイズへトリミング・圧縮する。
+- 将来見直し条件: 無料素材で花種や季節感の品質が不足する場合、ユーザー提供写真または有料素材を検討する。

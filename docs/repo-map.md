@@ -25,6 +25,7 @@
 | src/lib/api/ | External API helpers | medium | Secrets must come from env values. |
 | tests/ | node:test coverage | medium | Domain regressions live here. |
 | public/ | PWA assets | low | Generated icons come from scripts/gen-icons.mjs. |
+| public/plant-rewards/ | Plant reward photo assets | low | Final monthly photos live under `final/`; keep source URLs and selections in docs/plant-reward-image-sources.md and docs/plant-reward-image-selections.md. |
 | docs/ | pm-zero project memory | medium | Vision, state, decisions, issues, repo map. |
 | scripts/ | Project tooling | medium | setup, verify, icon generation. |
 
