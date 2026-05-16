@@ -1,35 +1,11 @@
 #!/usr/bin/env node
-// pm-zero v9.3 -- Unified Verification Script
-import { execSync } from 'node:child_process';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 
-const projectRoot = process.cwd();
-const results = [];
-
-function run(label, command) {
-  console.log(`\n--- ${label} ---`);
-  try {
-    execSync(command, { cwd: projectRoot, stdio: 'inherit', timeout: 120_000 });
-    results.push({ label, status: 'PASS' });
-  } catch (e) {
-    results.push({ label, status: 'FAIL', code: e.status });
-  }
-}
-
-try {
-  await fs.access(path.join(projectRoot, 'pnpm-lock.yaml'));
-  console.log('[verify] Package manager: pnpm');
-} catch {
-  console.warn('[verify] Warning: pnpm-lock.yaml not found');
-}
-
-const requiredFiles = [
+const pnpm = 'pnpm'
+const requiredPaths = [
   'AGENTS.md',
   'CLAUDE.md',
-  'OS-KERNEL.md',
-  'MEMORY.md',
-  'CONTEXT.md',
   'HANDOFF-JA.md',
   'tasks.md',
   'docs/vision.md',
@@ -38,36 +14,35 @@ const requiredFiles = [
   'docs/issues.md',
   'docs/repo-map.md',
   '.claude/settings.json',
-  '.claude/hooks/dispatcher.mjs',
-  '.claude/skills/index.md',
-];
+]
 
-console.log('\n--- Adapter Integrity ---');
-for (const file of requiredFiles) {
-  try {
-    await fs.access(path.join(projectRoot, file));
-    console.log(`  ✓ ${file}`);
-  } catch {
-    console.error(`  ✗ ${file} MISSING`);
-    results.push({ label: `file:${file}`, status: 'FAIL' });
+const failures = []
+
+console.log('=== Task Plant verification ===')
+for (const file of requiredPaths) {
+  const ok = existsSync(file)
+  console.log(`${ok ? 'OK' : 'MISSING'} ${file}`)
+  if (!ok) failures.push(`required:${file}`)
+}
+
+function run(label, args) {
+  console.log(`\n--- ${label} ---`)
+  const result = spawnSync(pnpm, args, { stdio: 'inherit', shell: process.platform === 'win32' })
+  if (result.status !== 0) {
+    failures.push(label)
   }
 }
 
-run('Lint', 'pnpm lint');
-run('Typecheck', 'pnpm typecheck');
-run('Test', 'pnpm test');
-run('Build', 'pnpm build');
+run('lint', ['lint'])
+run('typecheck', ['typecheck'])
+run('test', ['test'])
+run('build', ['build'])
 
-console.log('\n=== Verification Summary ===');
-for (const r of results) {
-  console.log(`  ${r.status === 'PASS' ? '✓' : '✗'} ${r.label}`);
+if (failures.length > 0) {
+  for (const failure of failures) {
+    console.error(`[verify] failed: ${failure}`)
+  }
+  process.exit(1)
 }
 
-const failed = results.filter((r) => r.status === 'FAIL');
-if (failed.length > 0) {
-  console.error(`\n${failed.length} check(s) failed.`);
-  process.exit(1);
-} else {
-  console.log('\nAll checks passed.');
-  process.exit(0);
-}
+console.log('[verify] all checks passed')

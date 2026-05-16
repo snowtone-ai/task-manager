@@ -152,3 +152,9 @@
 - 採用理由: リモート側で導入済みの `plantState` と同期しつつ、ナビ重複をなくすことで同種の表示欠落を防げるため
 - 不採用案: 各画面に下部ナビを個別実装し続ける → ページ追加時にタブ欠落が再発しやすい
 - 将来見直し条件: 月跨ぎ履歴、植物図鑑、手動育成状態など永続化が必要になった場合
+## D-017: pm-zero v9.4 Lean Task Ledger alignment
+
+- Date: 2026-05-16
+- Decision: Keep Task Plant project memory in AGENTS.md, tasks.md, docs/state.md, docs/repo-map.md, docs/decisions.md, and docs/issues.md.
+- Rationale: pm-zero v9.4 assigns reusable behavior, model defaults, and generic hooks to global config. The repo should keep only product facts, task state, and verification commands.
+- Consequence: Project-local Codex/MCP/hook scaffolds are removed unless a future task records a concrete deterministic need.

@@ -44,6 +44,8 @@ logs/*
 !logs/.gitkeep
 !.env.example
 .claude/settings.local.json
+.claude/worktrees/
+.mcp.json
 
 # typescript
 *.tsbuildinfo

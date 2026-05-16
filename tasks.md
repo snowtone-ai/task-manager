@@ -1,14 +1,13 @@
-# tasks.md -- pm-zero v9.3 Execution Ledger
+# tasks.md -- pm-zero v9.4 Execution Ledger
 
 ## Goal Binding
 - Vision source: docs/vision.md
-- Active goal: Adapt Task Plant repository to pm-zero v9.3 with minimal changes and audit contradictions.
-- Codex /goal: Optional; tasks.md remains source of truth.
+- Active goal: Maintain Task Plant under pm-zero v9.4 with product code changes tracked as explicit tasks.
 - Planning owner: Codex CLI
 - Implementation owner: Codex CLI
 - Review owner: Codex CLI self-audit; cross-vendor review required only for trigger work.
 
-## Task Status Vocabulary
+## Status Vocabulary
 - proposed: idea exists, not ready
 - ready: owner, dependencies, write scope, acceptance, verification, and expected evidence are clear
 - doing: one owner is actively working
@@ -27,10 +26,11 @@
 ## Tasks
 | ID | Status | Owner | Depends On | Write Scope | Acceptance | Verification | Evidence |
 |---|---|---|---|---|---|---|---|
-| T001 | verified | Codex CLI | none | AGENTS.md, OS-KERNEL.md, HANDOFF-JA.md, MEMORY.md, CONTEXT.md, tasks.md, docs/repo-map.md, docs/state.md, docs/decisions.md, package.json, package-lock.json, scripts/*.mjs, README.md, docs/codex-prompt.md, docs/implementation-plan.md | Repository has pm-zero v9.3 task ledger, repo map, scope lock rules, aligned commands, pnpm-only lockfile policy, and no obvious OS-document contradictions | git diff --check; pnpm lint; pnpm typecheck; pnpm test; pnpm build; pnpm verify | all passed on 2026-05-15 |
+| T001 | verified | Codex CLI | none | Legacy pm-zero metadata and project docs | Repository had the earlier task ledger, repo map, scope lock rules, aligned commands, and pnpm-only lockfile policy | git diff --check; pnpm lint; pnpm typecheck; pnpm test; pnpm build; pnpm verify | all passed on 2026-05-15 |
 | T002 | ready | Codex CLI | T001 | Existing implementation files for active product work only | Continue Task Plant Phase 1-7 using docs/implementation-plan.md with disjoint write scope per task | pnpm lint; pnpm typecheck; pnpm build; related tests; browser smoke for UI | pending |
 | T003 | verified | Codex CLI | T001 | src/app/plant/page.tsx, src/components/navigation/bottom-nav.tsx, src/components/plant/, src/hooks/use-plant.ts, src/lib/domain/plant.ts, tests/lib/domain/plant.test.mjs, docs/decisions.md, docs/repo-map.md, docs/state.md, tasks.md | Plant tab is visible on app screens, `/plant` renders the monthly plant view, and domain tests prevent blank plant state regressions | pnpm lint; pnpm typecheck; pnpm test; pnpm build; pnpm verify; browser smoke | all passed on 2026-05-15; smoke confirmed `/`, `/plant`, `/all` show 3-tab nav and `/plant` shows バラ |
 | T004 | verified | Codex CLI | T003 | src/lib/domain/plant.ts, src/hooks/use-plant.ts, src/lib/taskDb.ts, src/hooks/use-home-screen.ts, src/components/all/all-screen.tsx, src/components/navigation/bottom-nav.tsx, src/components/home/home-screen.tsx, src/components/plant/plant-screen.tsx, tests/lib/domain/plant.test.mjs, docs/decisions.md, docs/state.md, tasks.md | Review指摘のNB-1〜NB-4を解消し、週境界・植物同期・採番重複の再発を防止する | pnpm lint; pnpm typecheck; pnpm test; pnpm build; pnpm verify | all passed on 2026-05-15; week-start tests added; plantState sync added for / and /all update paths |
+| T005 | verified | Codex CLI | none | AGENTS.md, CLAUDE.md, HANDOFF-JA.md, tasks.md, docs/state.md, docs/repo-map.md, docs/decisions.md, scripts/setup.mjs, scripts/verify.mjs, .claude/settings.json, .gitignore | pm-zero v9.4 source-of-truth files are current, old project-local hook/MCP/Codex scaffolds are removed unless justified, and product code is untouched | git diff --check; pnpm verify | 2026-05-17: node scripts/verify.mjs passed; git diff --check passed before commit. |
 
 ## Execution Pointer
 Current active task, executor, write lock, and latest verification live in docs/state.md.

@@ -6,40 +6,5 @@
       "Read(**/.env)",
       "Read(**/.env.*)"
     ]
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup|resume|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/dispatcher.mjs --event=SessionStart"
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/dispatcher.mjs --event=PostToolUseFailure"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/dispatcher.mjs --event=UserPromptSubmit"
-          }
-        ]
-      }
-    ]
   }
 }
